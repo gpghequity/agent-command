@@ -1,0 +1,126 @@
+<section class="page-header">
+  <h1 class="h1">Broker Dashboard</h1>
+  <div class="sub">Agent roster, onboarding, training — one view</div>
+</section>
+
+<section class="stats-row stats-5">
+  <% stats.forEach(stat => { %>
+    <div class="stat-card">
+      <div class="stat-value"><%= stat.value %></div>
+      <div class="stat-label"><%= stat.label %></div>
+    </div>
+  <% }); %>
+</section>
+
+<div class="dash-grid">
+  <!-- LEFT: AGENT ROSTER -->
+  <section class="card table-card">
+    <div class="card-head">
+      <div>
+        <h2 class="h2">Agent Roster</h2>
+        <div class="sub">Click a row to open the agent file</div>
+      </div>
+      <button type="button" class="btn btn-primary" id="open-add-agent">+ ADD AGENT</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="ac-table" id="agents-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>State</th>
+            <th>Plan</th>
+            <th>Status</th>
+            <th>Transactions</th>
+            <th>Training</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% agents.forEach(a => { %>
+            <tr class="agent-row" data-name="<%= a.name %>">
+              <td><strong><%= a.name %></strong></td>
+              <td><%= a.state %></td>
+              <td><%= a.plan %></td>
+              <td>
+                <span class="status-dot status-<%= a.statusColor %>"></span>
+                <span class="status-text"><%= a.statusLabel %></span>
+              </td>
+              <td><%= a.txYtd %></td>
+              <td>
+                <span class="training-count <%= a.complete ? 'complete' : '' %>">
+                  <%= a.training %><% if (a.complete) { %> <span class="check">✓</span><% } %>
+                </span>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- RIGHT: ACTION REQUIRED + DEADLINES -->
+  <aside class="dash-side">
+    <section class="card side-card">
+      <h3 class="h3 side-title side-alert">Action Required</h3>
+      <ul class="side-list">
+        <% actionRequired.forEach(item => { %>
+          <li>
+            <div class="side-name"><%= item.name %></div>
+            <div class="side-note"><%= item.note %></div>
+          </li>
+        <% }); %>
+      </ul>
+    </section>
+
+    <section class="card side-card">
+      <h3 class="h3 side-title">Upcoming Deadlines</h3>
+      <ul class="side-list">
+        <% deadlines.forEach(d => { %>
+          <li>
+            <div class="side-name"><%= d.name %></div>
+            <div class="side-note"><strong><%= d.event %>:</strong> <%= d.date %></div>
+          </li>
+        <% }); %>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+<!-- ADD AGENT MODAL -->
+<div class="modal" id="add-agent-modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 class="h2">Add Agent</h2>
+      <button type="button" class="modal-close" data-close-modal aria-label="Close">&times;</button>
+    </div>
+    <form id="add-agent-form" class="modal-body">
+      <label for="a-name">Name</label>
+      <input type="text" id="a-name" name="name" required placeholder="Full name" />
+
+      <label for="a-email">Email</label>
+      <input type="email" id="a-email" name="email" required placeholder="name@brokerage.com" />
+
+      <label for="a-state">State</label>
+      <select id="a-state" name="state">
+        <option value="PA">Pennsylvania (PA)</option>
+        <option value="OH">Ohio (OH)</option>
+      </select>
+
+      <label for="a-plan">Plan</label>
+      <select id="a-plan" name="plan">
+        <option value="Plan A">Plan A</option>
+        <option value="Plan B">Plan B</option>
+        <option value="Plan C">Plan C</option>
+      </select>
+
+      <label for="a-license">License Number</label>
+      <input type="text" id="a-license" name="license" placeholder="RS1234567" />
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Agent</button>
+      </div>
+    </form>
+  </div>
+</div>

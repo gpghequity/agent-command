@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title : 'Agent Command' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="page-<%= page %>">
+
+<% if (page !== 'login') { %>
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <a class="brand" href="<%= isLoggedIn ? (role === 'admin' ? '/dashboard' : '/agent-dashboard') : '/about' %>">
+        <span class="ac-badge ac-badge-sm">AC</span>
+        <span class="brand-text"><%= appName %></span>
+      </a>
+      <div class="nav-links">
+        <% if (isLoggedIn) { %>
+          <a href="<%= role === 'admin' ? '/dashboard' : '/agent-dashboard' %>"
+             class="<%= (currentPath === '/dashboard' || currentPath === '/agent-dashboard') ? 'active' : '' %>">Dashboard</a>
+          <a href="/training" class="<%= currentPath.startsWith('/training') ? 'active' : '' %>">Training</a>
+          <a href="/about"    class="<%= currentPath === '/about' ? 'active' : '' %>">About</a>
+          <% if (role === 'admin') { %>
+            <span class="role-badge role-admin">BROKER ADMIN</span>
+          <% } else { %>
+            <span class="role-badge role-agent">AGENT</span>
+          <% } %>
+          <a href="/logout" class="nav-logout">Logout</a>
+        <% } else { %>
+          <a href="/about" class="<%= currentPath === '/about' ? 'active' : '' %>">About</a>
+          <a href="/login" class="btn btn-ghost">Sign In</a>
+        <% } %>
+      </div>
+    </div>
+  </nav>
+<% } %>
+
+<main class="main">
+  <%- include(page, typeof locals === 'object' ? locals : {}) %>
+</main>
+
+<footer class="site-footer">
+  &copy; 2026 Projects with a Purpose LLC &nbsp;|&nbsp; <%= appName %> <%= version %> &nbsp;|&nbsp; Last updated: <%= lastUpdated %>
+</footer>
+
+<% if (page === 'dashboard') { %><script src="/js/dashboard.js"></script><% } %>
+<% if (page === 'module5') { %><script src="/js/module5.js"></script><% } %>
+
+</body>
+</html>

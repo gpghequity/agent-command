@@ -1,0 +1,35 @@
+<section class="page-header">
+  <h1 class="h1">Training</h1>
+  <div class="sub">Five core modules. Agents don't move forward until they can demonstrate they learned it.</div>
+</section>
+
+<section class="modules-grid">
+  <% modules.forEach(m => { %>
+    <article class="card module-card">
+      <div class="module-head">
+        <div class="module-num">Module <%= m.id %></div>
+        <span class="badge
+          <% if (m.status === 'Complete') { %>badge-green<% } else if (m.status === 'In Progress') { %>badge-orange<% } else { %>badge-gray<% } %>">
+          <%= m.status.toUpperCase() %>
+        </span>
+      </div>
+
+      <h2 class="module-title"><%= m.title %></h2>
+      <div class="module-sub"><%= m.subtitle %></div>
+
+      <ul class="module-summary">
+        <% m.summary.forEach(s => { %>
+          <li><%= s %></li>
+        <% }); %>
+      </ul>
+
+      <div class="module-foot">
+        <span class="module-time"><%= m.minutes %> min</span>
+        <a class="btn <%= m.status === 'Complete' ? 'btn-ghost' : 'btn-primary' %>"
+           href="/training/module/<%= m.id %>">
+          <%= m.status === 'Complete' ? 'Review' : 'Start' %>
+        </a>
+      </div>
+    </article>
+  <% }); %>
+</section>

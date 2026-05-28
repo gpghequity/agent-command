@@ -1,0 +1,49 @@
+<section class="page-header">
+  <h1 class="h1">Welcome, <%= userName || 'Demo Agent' %></h1>
+  <div class="sub">Your transactions, training, and onboarding — one place</div>
+</section>
+
+<section class="stats-row">
+  <% stats.forEach(stat => { %>
+    <div class="stat-card">
+      <div class="stat-value"><%= stat.value %></div>
+      <div class="stat-label"><%= stat.label %></div>
+    </div>
+  <% }); %>
+</section>
+
+<div class="dash-grid">
+  <section class="card">
+    <h2 class="h2">My Action Items</h2>
+    <div class="sub">Complete these to stay on track.</div>
+    <ul class="action-list">
+      <% actionItems.forEach(item => { %>
+        <li>
+          <span class="action-bullet">•</span>
+          <span><%= item %></span>
+        </li>
+      <% }); %>
+    </ul>
+  </section>
+
+  <aside class="card">
+    <h2 class="h2">My Onboarding Checklist</h2>
+    <%
+      const doneCount = onboardingChecklist.filter(x => x.done).length;
+      const total = onboardingChecklist.length;
+      const pct = Math.round((doneCount / total) * 100);
+    %>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" style="width: <%= pct %>%"></div></div>
+      <div class="progress-label"><%= doneCount %>/<%= total %> · <%= pct %>%</div>
+    </div>
+    <ul class="checklist">
+      <% onboardingChecklist.forEach(item => { %>
+        <li class="<%= item.done ? 'done' : '' %>">
+          <span class="check-icon"><%= item.done ? '✓' : '○' %></span>
+          <span><%= item.label %></span>
+        </li>
+      <% }); %>
+    </ul>
+  </aside>
+</div>

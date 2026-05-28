@@ -1,0 +1,124 @@
+<section class="page-header">
+  <a class="back-link" href="/training">← Back to Training</a>
+  <h1 class="h1"><%= mod.title %></h1>
+  <div class="sub"><%= mod.subtitle %> · <%= mod.minutes %> min</div>
+</section>
+
+<% if (completed) { %>
+  <div class="completion-banner">
+    <span class="completion-icon">✓</span>
+    <div>
+      <div class="completion-title">Module 5 Complete</div>
+      <div class="completion-sub">Your progress has been recorded. You can review the material any time.</div>
+    </div>
+  </div>
+<% } %>
+
+<article class="card lesson">
+  <h2 class="lesson-h">Federal Protected Classes Under the Fair Housing Act</h2>
+  <ul class="lesson-list">
+    <li>Race</li>
+    <li>Color</li>
+    <li>National Origin</li>
+    <li>Religion</li>
+    <li>Sex <span class="muted">(including gender identity and sexual orientation per HUD 2021)</span></li>
+    <li>Familial Status</li>
+    <li>Disability</li>
+  </ul>
+
+  <h2 class="lesson-h">Pennsylvania Additions</h2>
+  <ul class="lesson-list">
+    <li>Age (40 and over)</li>
+    <li>Ancestry</li>
+    <li>Use of guide or support animal</li>
+  </ul>
+
+  <h2 class="lesson-h">Ohio Additions</h2>
+  <ul class="lesson-list">
+    <li>Ancestry</li>
+    <li>Military status</li>
+  </ul>
+
+  <h2 class="lesson-h">What Steering Looks Like</h2>
+  <p>
+    Steering is directing a buyer or renter toward or away from a particular neighborhood, building,
+    or property based on protected class. Examples:
+  </p>
+  <ul class="lesson-list">
+    <li>"This neighborhood might not be a good fit for your family" — <em>familial status steering</em></li>
+    <li>"Let me show you homes where you'll feel more comfortable" — <em>racial steering</em></li>
+  </ul>
+  <p>Even well-intentioned suggestions can be steering.</p>
+
+  <h2 class="lesson-h">What Your Advertising Cannot Say</h2>
+  <ul class="lesson-list">
+    <li>"Great for families" — <em>familial status</em></li>
+    <li>"Adults only" — <em>familial status and age (except legal senior housing)</em></li>
+    <li>"Christian neighborhood" — <em>religion</em></li>
+    <li>"Within walking distance of synagogue" — <em>religion</em></li>
+    <li>"No wheelchairs" — <em>disability</em></li>
+    <li>"Perfect bachelor pad" — <em>sex / familial status</em></li>
+  </ul>
+
+  <h2 class="lesson-h">Code of Ethics Basics (Article 10)</h2>
+  <p>
+    REALTORS shall not deny equal professional services to any person for reasons of race, color,
+    religion, sex, handicap, familial status, national origin, sexual orientation, or gender identity.
+    This applies to listing, showing, financing, and every stage of the transaction.
+  </p>
+
+  <h2 class="lesson-h">What To Do If You Witness a Violation</h2>
+  <ol class="lesson-ol">
+    <li>Document what you observed — date, time, parties, statements made</li>
+    <li>Report to your broker immediately</li>
+    <li>Do not confront the other party yourself</li>
+    <li>Broker escalates to brokerage compliance and state commission as required</li>
+  </ol>
+
+  <h2 class="lesson-h">Dual Agency Rules</h2>
+  <p>
+    Dual agency is legal in PA and OH with written informed consent from both parties. You must
+    disclose in writing before either party signs an agreement. Dual agents owe loyalty to both —
+    they cannot advocate for price on either side. Many brokerages prohibit dual agency entirely.
+  </p>
+</article>
+
+<!-- CONFIRMATION QUESTION -->
+<section class="card quiz-card" id="quiz">
+  <h2 class="h2">Confirmation Question</h2>
+  <p class="quiz-prompt">
+    Ohio adds which protected class beyond the federal Fair Housing Act protected classes?
+  </p>
+
+  <form action="/training/module/5/submit" method="POST" id="quiz-form">
+    <% const opts = [
+      { v: 'A', t: 'Age' },
+      { v: 'B', t: 'Military status' },
+      { v: 'C', t: 'Ancestry' },
+      { v: 'D', t: 'Sexual orientation' }
+    ]; %>
+    <% opts.forEach(o => { %>
+      <label class="quiz-option">
+        <input type="radio" name="answer" value="<%= o.v %>" <%= completed ? 'disabled' : '' %> />
+        <span class="quiz-letter"><%= o.v %></span>
+        <span><%= o.t %></span>
+      </label>
+    <% }); %>
+
+    <% if (result === 'correct') { %>
+      <div class="quiz-result correct">
+        <span class="check">✓</span> Correct! Module 5 Complete.
+      </div>
+    <% } else if (result === 'incorrect') { %>
+      <div class="quiz-result incorrect">
+        Incorrect. Review the module and try again.
+      </div>
+    <% } %>
+
+    <% if (!completed) { %>
+      <button type="submit" class="btn btn-primary btn-block">Submit Answer</button>
+    <% } else { %>
+      <a href="/training" class="btn btn-primary btn-block">Back to Training</a>
+    <% } %>
+  </form>
+</section>
