@@ -1,26 +1,27 @@
-﻿{
-    "name":  "agent-command",
-    "version":  "1.0.0",
-    "private":  true,
-    "description":  "Agent Command â€” The Operating System for Scalable Brokerages (Projects with a Purpose LLC)",
-    "main":  "index.js",
-    "scripts":  {
-                    "start":  "node index.js",
-                    "dev":  "node index.js",
-                    "test":  "vitest run"
-                },
-    "dependencies":  {
-                         "dotenv":  "^16.4.5",
-                         "ejs":  "^3.1.10",
-                         "express":  "^4.21.2",
-                         "express-rate-limit":  "^8.5.2",
-                         "express-session":  "^1.18.1"
-                     },
-    "engines":  {
-                    "node":  "\u003e=20"
-                },
-    "devDependencies":  {
-                            "supertest":  "^7.2.2",
-                            "vitest":  "^4.1.7"
-                        }
+{
+    "name": "agent-command",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Agent Command â€” The Operating System for Scalable Brokerages (Projects with a Purpose LLC)",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "node index.js",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "dotenv": "^16.4.5",
+        "ejs": "^3.1.10",
+        "express": "^4.21.2",
+        "express-rate-limit": "^8.5.2",
+        "express-session": "^1.18.1",
+        "googleapis": "^173.0.0"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "devDependencies": {
+        "supertest": "^7.2.2",
+        "vitest": "^4.1.7"
+    }
 }

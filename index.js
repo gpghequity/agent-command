@@ -6,6 +6,32 @@ const session = require('express-session');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const generalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false });
+const { google } = require('googleapis');
+
+// ── Google Sheets client (same pattern as other command consoles) ─────────────
+let _sheets = null;
+function getSheets() {
+  if (_sheets) return _sheets;
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (!raw) return null;
+  try {
+    const c = JSON.parse(raw);
+    const auth = new google.auth.JWT({ email: c.client_email, key: c.private_key, scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'] });
+    _sheets = google.sheets({ version: 'v4', auth });
+    return _sheets;
+  } catch { return null; }
+}
+async function readTab(tab) {
+  const s = getSheets(); const id = process.env.GOOGLE_SHEETS_ID;
+  if (!s || !id) return [];
+  try {
+    const res = await s.spreadsheets.values.get({ spreadsheetId: id, range: `'${tab}'!A:ZZ` });
+    const rows = res.data.values || [];
+    if (rows.length < 2) return [];
+    const headers = rows[0].map(h => String(h).toLowerCase().replace(/\s+/g, '_'));
+    return rows.slice(1).map(row => { const o = {}; headers.forEach((h, i) => { o[h] = row[i] || ''; }); return o; });
+  } catch { return []; }
+}
 
 // ─── VERSION + DEPLOY TIMESTAMP ───────────────────────────────────────────
 // Per brief: update both BEFORE every Railway push.
@@ -134,36 +160,42 @@ app.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
 });
 
-// ─── BROKER DASHBOARD ─────────────────────────────────────────────────────
-app.get('/dashboard', requireAuth('admin'), (req, res) => {
+// ─── BROKER DASHBOARD — live from Licensed Agents + Team Roster tabs ────────
+app.get('/dashboard', requireAuth('admin'), async (req, res) => {
+  let agents = [];
+  let actionRequired = [];
+  try {
+    const [licensed, roster] = await Promise.all([readTab('Licensed Agents'), readTab('Team Roster')]);
+    const allAgents = licensed.length ? licensed : roster;
+    for (const row of allAgents) {
+      const name = row.agent_name || row.name || '';
+      if (!name) continue;
+      const status = row.status || row.license_status || 'active';
+      const statusColor = status.toLowerCase().includes('active') ? 'green' : status.toLowerCase().includes('onboarding') ? 'blue' : 'orange';
+      agents.push({
+        name,
+        state: row.state || row.license_state || 'PA',
+        plan: row.plan || row.compensation_plan || 'Plan A',
+        statusColor,
+        statusLabel: status.toUpperCase(),
+        txYtd: row.transactions_ytd || row.tx_ytd || '0',
+        training: row.training_completed || '0/5',
+        complete: (row.status || '').toLowerCase() === 'active'
+      });
+      if (row.action_required || (row.status || '').toLowerCase().includes('onboarding')) {
+        actionRequired.push({ name, note: row.notes || row.action_required || 'Check onboarding status' });
+      }
+    }
+  } catch { /* fall through */ }
+
   const stats = [
-    { label: 'Total Active Agents',      value: '6' },
-    { label: 'In Onboarding',            value: '2' },
-    { label: 'Training In Progress',     value: '3' },
-    { label: 'Compliance Flags',         value: '1' },
-    { label: 'Pending Applications',     value: '1' }
+    { label: 'Total Agents',         value: String(agents.length) },
+    { label: 'Active',               value: String(agents.filter(a => a.statusColor === 'green').length) },
+    { label: 'In Onboarding',        value: String(agents.filter(a => a.statusColor === 'blue').length) },
+    { label: 'Data Source',          value: process.env.GOOGLE_SHEETS_ID ? 'Live (Sheets)' : 'No Sheet ID' }
   ];
 
-  const agents = [
-    { name: 'Naire Crayton',  state: 'PA', plan: 'Plan A', statusColor: 'green',  statusLabel: 'ACTIVE',      txYtd: '4 YTD',  training: '5/5', complete: true },
-    { name: 'Ryan Franco',    state: 'PA', plan: 'Plan A', statusColor: 'green',  statusLabel: 'ACTIVE',      txYtd: '11 YTD', training: '5/5', complete: true },
-    { name: 'Drew Mitchell',  state: 'PA', plan: 'Plan A', statusColor: 'yellow', statusLabel: 'ACTIVE',      txYtd: '1 YTD',  training: '3/5', complete: false },
-    { name: 'Connor Walsh',   state: 'PA', plan: 'Plan B', statusColor: 'blue',   statusLabel: 'ONBOARDING',  txYtd: '0',      training: '1/5', complete: false },
-    { name: 'Alex Torres',    state: 'OH', plan: 'Plan A', statusColor: 'blue',   statusLabel: 'ONBOARDING',  txYtd: '0',      training: '0/5', complete: false },
-    { name: 'Will Chambers',  state: 'PA', plan: 'Plan A', statusColor: 'orange', statusLabel: 'INACTIVE',    txYtd: '0 YTD',  training: '5/5', complete: true }
-  ];
-
-  const actionRequired = [
-    { name: 'Alex Torres',    note: 'Onboarding checklist 0% complete — 5 days since application' },
-    { name: 'Drew Mitchell',  note: 'Training Module 4 incomplete — deadline approaching' },
-    { name: 'Connor Walsh',   note: 'ICA not yet uploaded' }
-  ];
-
-  const deadlines = [
-    { name: 'Connor Walsh', event: 'ICA due',         date: 'April 22' },
-    { name: 'Alex Torres',  event: 'Orientation due', date: 'April 24' }
-  ];
-
+  const deadlines = [];
   res.render('layout', {
     page: 'dashboard',
     title: 'Broker Dashboard — Agent Command',
