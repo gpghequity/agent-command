@@ -290,6 +290,31 @@ app.post('/training/module/5/submit', requireAuth(), (req, res) => {
   });
 });
 
+// ─── API: AGENTS (JSON, admin-only) — live Sheets read, empty-array fallback ─
+app.get('/api/agents', requireAuth('admin'), async (req, res) => {
+  try {
+    const [licensed, roster] = await Promise.all([readTab('Licensed Agents'), readTab('Team Roster')]);
+    const allAgents = licensed.length ? licensed : roster;
+    const agents = [];
+    for (const row of allAgents) {
+      const name = row.agent_name || row.name || '';
+      if (!name) continue;
+      agents.push({
+        name,
+        state: row.state || row.license_state || 'PA',
+        plan: row.plan || row.compensation_plan || '',
+        status: row.status || row.license_status || 'active',
+        transactions_ytd: row.transactions_ytd || row.tx_ytd || '0',
+        training_completed: row.training_completed || '0/5',
+        notes: row.notes || ''
+      });
+    }
+    return res.json({ ok: true, source: 'sheets', agents });
+  } catch {
+    return res.json({ ok: true, source: 'fallback', agents: [] });
+  }
+});
+
 // ─── ABOUT ────────────────────────────────────────────────────────────────
 app.get('/about', (req, res) => {
   res.render('layout', { page: 'about', title: 'About — Agent Command' });
